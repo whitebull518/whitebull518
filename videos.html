@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频教程 - 武学堂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #2C2C2C;
+            --vermillion: #D32F2F;
+            --forest-green: #2E7D32;
+            --gold: #FFA000;
+            --ink-gray: #757575;
+            --paper-white: #FEFEFE;
+            --light-ink: #BDBDBD;
+            --deep-teal: #00695C;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #FEFEFE 0%, #F5F5F5 100%);
+            color: var(--ink-black);
+        }
+        
+        .hero-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            background: linear-gradient(45deg, var(--vermillion), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .decorative-title {
+            font-family: 'ZCOOL XiaoWei', serif;
+            color: var(--deep-teal);
+        }
+        
+        .navigation {
+            background: rgba(254, 254, 254, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--light-ink);
+        }
+        
+        .filter-sidebar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--light-ink);
+            border-radius: 12px;
+        }
+        
+        .video-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-card:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(44,44,44,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--vermillion), #E53935);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(211,47,47,0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--deep-teal);
+            border: 2px solid var(--deep-teal);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--deep-teal);
+            color: white;
+        }
+        
+        .filter-btn {
+            background: transparent;
+            color: var(--ink-gray);
+            border: 1px solid var(--light-ink);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--vermillion);
+            color: white;
+            border-color: var(--vermillion);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--vermillion);
+            color: var(--vermillion);
+        }
+        
+        .search-box {
+            background: white;
+            border: 2px solid var(--light-ink);
+            border-radius: 25px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--vermillion);
+            box-shadow: 0 0 0 3px rgba(211,47,47,0.1);
+        }
+        
+        .difficulty-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .difficulty-beginner {
+            background: #E8F5E8;
+            color: var(--forest-green);
+        }
+        
+        .difficulty-intermediate {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+        
+        .difficulty-advanced {
+            background: #FFEBEE;
+            color: var(--vermillion);
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .footer {
+            background: var(--ink-black);
+            color: var(--paper-white);
+            border-top: 3px solid var(--vermillion);
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="./resources/logo.png" alt="武学堂" class="w-10 h-10">
+                <h1 class="text-2xl font-bold hero-title">武学堂</h1>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">首页</a>
+                <a href="videos.html" class="text-lg font-medium text-red-600">视频教程</a>
+                <a href="membership.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">会员中心</a>
+                <a href="profile.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">个人中心</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="loginBtn" class="btn-secondary">登录</button>
+                <button id="registerBtn" class="btn-primary">注册</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="decorative-title text-4xl md:text-5xl font-bold mb-4">视频教程</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    选择您感兴趣的武术门派和难度等级，开始您的武术学习之旅
+                </p>
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                    <!-- Search Box -->
+                    <div class="flex-1 max-w-md">
+                        <input type="text" id="searchInput" class="search-box w-full" placeholder="搜索视频标题、教练或关键词...">
+                    </div>
+                    
+                    <!-- Sort Options -->
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600 font-medium">排序:</span>
+                        <select id="sortSelect" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-red-500">
+                            <option value="latest">最新发布</option>
+                            <option value="popular">最受欢迎</option>
+                            <option value="rating">评分最高</option>
+                            <option value="duration">时长排序</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="pb-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Filter Sidebar -->
+                <div class="lg:w-1/4">
+                    <div class="filter-sidebar p-6 sticky top-24">
+                        <h3 class="text-xl font-bold mb-6 decorative-title">筛选条件</h3>
+                        
+                        <!-- School Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold mb-3 text-gray-800">武术门派</h4>
+                            <div class="space-y-2">
+                                <button class="filter-btn w-full text-left active" data-filter="all" data-type="school">全部门派</button>
+                                <button class="filter-btn w-full text-left" data-filter="shaolin" data-type="school">少林功夫</button>
+                                <button class="filter-btn w-full text-left" data-filter="taichi" data-type="school">太极拳</button>
+                                <button class="filter-btn w-full text-left" data-filter="wingchun" data-type="school">咏春拳</button>
+                                <button class="filter-btn w-full text-left" data-filter="xingyi" data-type="school">形意拳</button>
+                                <button class="filter-btn w-full text-left" data-filter="bagua" data-type="school">八卦掌</button>
+                                <button class="filter-btn w-full text-left" data-filter="nanquan" data-type="school">南拳系列</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Difficulty Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold mb-3 text-gray-800">难度等级</h4>
+                            <div class="space-y-2">
+                                <button class="filter-btn w-full text-left active" data-filter="all" data-type="difficulty">全部等级</button>
+                                <button class="filter-btn w-full text-left" data-filter="beginner" data-type="difficulty">初级入门</button>
+                                <button class="filter-btn w-full text-left" data-filter="intermediate" data-type="difficulty">中级进阶</button>
+                                <button class="filter-btn w-full text-left" data-filter="advanced" data-type="difficulty">高级专业</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Duration Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold mb-3 text-gray-800">视频时长</h4>
+                            <div class="space-y-2">
+                                <button class="filter-btn w-full text-left active" data-filter="all" data-type="duration">全部时长</button>
+                                <button class="filter-btn w-full text-left" data-filter="short" data-type="duration">10分钟以内</button>
+                                <button class="filter-btn w-full text-left" data-filter="medium" data-type="duration">10-30分钟</button>
+                                <button class="filter-btn w-full text-left" data-filter="long" data-type="duration">30分钟以上</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Clear Filters -->
+                        <button id="clearFilters" class="btn-secondary w-full">清除筛选</button>
+                    </div>
+                </div>
+                
+                <!-- Video Grid -->
+                <div class="lg:w-3/4">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div class="text-gray-600">
+                            共找到 <span id="videoCount" class="font-bold text-red-600">24</span> 个视频
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            显示 <span id="showingCount">1-12</span> 个
+                        </div>
+                    </div>
+                    
+                    <div class="video-grid" id="videoGrid">
+                        <!-- Video cards will be dynamically generated -->
+                    </div>
+                    
+                    <!-- Load More Button -->
+                    <div class="text-center mt-12">
+                        <button id="loadMoreBtn" class="btn-primary px-8 py-3 text-lg">加载更多</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer py-12 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-6">
+                <img src="./resources/logo.png" alt="武学堂" class="w-8 h-8">
+                <h3 class="text-2xl font-bold">武学堂</h3>
+            </div>
+            <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                传承千年武学精髓，弘扬中华武术文化。我们致力于通过现代化的教学方式，让更多人了解和学习正宗的中国武术。
+            </p>
+            <div class="border-t border-gray-700 pt-6">
+                <p class="text-gray-500">
+                    © 2024 武学堂. 保留所有权利. | 京ICP备12345678号 | 京公网安备11010802012345号
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Video data
+        const videoData = [
+            {
+                id: 1,
+                title: "少林基本功 - 马步冲拳",
+                description: "少林寺第34代传人亲自示范，从基础马步开始，掌握正宗少林功夫的基本要领。",
+                image: "./resources/shaolin1.jpg",
+                duration: "25:30",
+                school: "shaolin",
+                difficulty: "beginner",
+                master: "释永信大师",
+                rating: 4.9,
+                views: 12500,
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 2,
+                title: "24式太极拳 - 起势到野马分鬃",
+                description: "陈氏太极拳第12代传人详细讲解24式太极拳的前三个动作，适合初学者。",
+                image: "./resources/taichi1.jpg",
+                duration: "18:45",
+                school: "taichi",
+                difficulty: "beginner",
+                master: "陈小旺大师",
+                rating: 4.8,
+                views: 9800,
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 3,
+                title: "咏春拳小念头 - 基础手法",
+                description: "咏春拳基础套路小念头的完整教学，包含手法、步法和呼吸要领。",
+                image: "./resources/wingchun1.jpg",
+                duration: "32:15",
+                school: "wingchun",
+                difficulty: "intermediate",
+                master: "叶问传人",
+                rating: 4.9,
+                views: 15600,
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 4,
+                title: "形意拳三体式 - 基础站桩",
+                description: "形意拳基础功法三体式的详细讲解，掌握内外合一的精髓。",
+                image: "./resources/xingyi1.jpg",
+                duration: "22:40",
+                school: "xingyi",
+                difficulty: "beginner",
+                master: "李仲轩传人",
+                rating: 4.7,
+                views: 7800,
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 5,
+                title: "八卦掌走圆 - 基本步法",
+                description: "八卦掌基础步法教学，学习趟泥步和转掌的基本要领。",
+                image: "./resources/modern1.jpg",
+                duration: "28:20",
+                school: "bagua",
+                difficulty: "intermediate",
+                master: "董海川传人",
+                rating: 4.6,
+                views: 6500,
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 6,
+                title: "少林罗汉拳 - 完整套路",
+                description: "少林传统拳法罗汉拳的完整套路教学，动作刚劲有力。",
+                image: "./resources/shaolin2.jpg",
+                duration: "45:30",
+                school: "shaolin",
+                difficulty: "advanced",
+                master: "释永信大师",
+                rating: 4.9,
+                views: 18200,
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 7,
+                title: "太极拳推手 - 单推手技法",
+                description: "太极拳推手基础技法，学习听劲、化劲、发劲的要领。",
+                image: "./resources/taichi2.jpg",
+                duration: "35:15",
+                school: "taichi",
+                difficulty: "intermediate",
+                master: "陈小旺大师",
+                rating: 4.8,
+                views: 11200,
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 8,
+                title: "咏春黐手 - 感觉训练",
+                description: "咏春拳黐手训练方法，培养手臂的感觉和反应能力。",
+                image: "./resources/wingchun2.jpg",
+                duration: "26:45",
+                school: "wingchun",
+                difficulty: "advanced",
+                master: "叶问传人",
+                rating: 4.7,
+                views: 8900,
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 9,
+                title: "形意五行拳 - 劈拳崩拳",
+                description: "形意拳五行拳中的劈拳和崩拳教学，掌握发劲技巧。",
+                image: "./resources/xingyi2.jpg",
+                duration: "30:20",
+                school: "xingyi",
+                difficulty: "advanced",
+                master: "李仲轩传人",
+                rating: 4.8,
+                views: 9600,
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 10,
+                title: "八卦掌八掌 - 老八掌",
+                description: "八卦掌传统老八掌的完整教学，包含八个基本掌法。",
+                image: "./resources/modern2.jpg",
+                duration: "42:10",
+                school: "bagua",
+                difficulty: "advanced",
+                master: "董海川传人",
+                rating: 4.9,
+                views: 13400,
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 11,
+                title: "南拳洪拳 - 工字伏虎拳",
+                description: "南派洪拳经典套路工字伏虎拳的详细教学。",
+                image: "./resources/weapons1.jpg",
+                duration: "38:25",
+                school: "nanquan",
+                difficulty: "intermediate",
+                master: "洪拳名家",
+                rating: 4.6,
+                views: 7200,
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 12,
+                title: "现代散打 - 基本攻防",
+                description: "现代散打搏击的基本攻防技法，实用性强。",
+                image: "./resources/weapons2.jpg",
+                duration: "24:35",
+                school: "modern",
+                difficulty: "beginner",
+                master: "国家队教练",
+                rating: 4.5,
+                views: 15800,
+                isNew: true,
+                isHot: true
+            }
+        ];
+
+        let currentFilters = {
+            school: 'all',
+            difficulty: 'all',
+            duration: 'all',
+            search: ''
+        };
+
+        let currentSort = 'latest';
+        let displayedVideos = 0;
+        const videosPerPage = 9;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFilters();
+            renderVideos();
+            setupEventListeners();
+        });
+
+        function initializeFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const filter = this.dataset.filter;
+                    
+                    // Remove active class from siblings
+                    const siblings = document.querySelectorAll(`[data-type="${type}"]`);
+                    siblings.forEach(sibling => sibling.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update filter
+                    currentFilters[type] = filter;
+                    
+                    // Re-render videos
+                    displayedVideos = 0;
+                    renderVideos();
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', function() {
+                currentFilters.search = this.value.toLowerCase();
+                displayedVideos = 0;
+                renderVideos();
+            });
+
+            // Sort select
+            document.getElementById('sortSelect').addEventListener('change', function() {
+                currentSort = this.value;
+                displayedVideos = 0;
+                renderVideos();
+            });
+
+            // Clear filters
+            document.getElementById('clearFilters').addEventListener('click', function() {
+                currentFilters = {
+                    school: 'all',
+                    difficulty: 'all',
+                    duration: 'all',
+                    search: ''
+                };
+                
+                // Reset UI
+                document.getElementById('searchInput').value = '';
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('[data-filter="all"]').forEach(btn => btn.classList.add('active'));
+                
+                displayedVideos = 0;
+                renderVideos();
+            });
+
+            // Load more button
+            document.getElementById('loadMoreBtn').addEventListener('click', function() {
+                renderVideos(true);
+            });
+        }
+
+        function filterVideos() {
+            let filtered = [...videoData];
+
+            // Apply filters
+            if (currentFilters.school !== 'all') {
+                filtered = filtered.filter(video => video.school === currentFilters.school);
+            }
+
+            if (currentFilters.difficulty !== 'all') {
+                filtered = filtered.filter(video => video.difficulty === currentFilters.difficulty);
+            }
+
+            if (currentFilters.duration !== 'all') {
+                filtered = filtered.filter(video => {
+                    const minutes = parseInt(video.duration.split(':')[0]);
+                    switch (currentFilters.duration) {
+                        case 'short': return minutes < 10;
+                        case 'medium': return minutes >= 10 && minutes < 30;
+                        case 'long': return minutes >= 30;
+                        default: return true;
+                    }
+                });
+            }
+
+            if (currentFilters.search) {
+                filtered = filtered.filter(video => 
+                    video.title.toLowerCase().includes(currentFilters.search) ||
+                    video.description.toLowerCase().includes(currentFilters.search) ||
+                    video.master.toLowerCase().includes(currentFilters.search)
+                );
+            }
+
+            // Apply sorting
+            filtered.sort((a, b) => {
+                switch (currentSort) {
+                    case 'latest':
+                        return b.id - a.id;
+                    case 'popular':
+                        return b.views - a.views;
+                    case 'rating':
+                        return b.rating - a.rating;
+                    case 'duration':
+                        return parseInt(a.duration.split(':')[0]) - parseInt(b.duration.split(':')[0]);
+                    default:
+                        return 0;
+                }
+            });
+
+            return filtered;
+        }
+
+        function renderVideos(append = false) {
+            const filtered = filterVideos();
+            const videoGrid = document.getElementById('videoGrid');
+            
+            if (!append) {
+                videoGrid.innerHTML = '';
+                displayedVideos = 0;
+            }
+
+            const startIndex = displayedVideos;
+            const endIndex = Math.min(startIndex + videosPerPage, filtered.length);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                const video = filtered[i];
+                const videoCard = createVideoCard(video);
+                videoGrid.appendChild(videoCard);
+            }
+
+            displayedVideos = endIndex;
+
+            // Update counts
+            document.getElementById('videoCount').textContent = filtered.length;
+            document.getElementById('showingCount').textContent = `1-${Math.min(displayedVideos, filtered.length)}`;
+
+            // Show/hide load more button
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (displayedVideos >= filtered.length) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+
+            // Trigger scroll reveal animation
+            setTimeout(() => {
+                const cards = videoGrid.querySelectorAll('.video-card:not(.revealed)');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('revealed');
+                    }, index * 100);
+                });
+            }, 100);
+        }
+
+        function createVideoCard(video) {
+            const card = document.createElement('div');
+            card.className = 'video-card scroll-reveal';
+            
+            const difficultyClass = `difficulty-${video.difficulty}`;
+            const difficultyText = {
+                'beginner': '初级',
+                'intermediate': '中级',
+                'advanced': '高级'
+            }[video.difficulty];
+
+            const schoolText = {
+                'shaolin': '少林功夫',
+                'taichi': '太极拳',
+                'wingchun': '咏春拳',
+                'xingyi': '形意拳',
+                'bagua': '八卦掌',
+                'nanquan': '南拳',
+                'modern': '现代武术'
+            }[video.school];
+
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${video.image}" alt="${video.title}" class="w-full h-48 object-cover">
+                    ${video.isHot ? '<div class="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">热门</div>' : ''}
+                    ${video.isNew ? '<div class="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">新课</div>' : ''}
+                    <div class="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm">
+                        ${video.duration}
+                    </div>
+                    <div class="absolute bottom-4 right-4 difficulty-badge ${difficultyClass}">
+                        ${difficultyText}
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-500">${schoolText}</span>
+                        <div class="flex items-center text-sm text-yellow-500">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            ${video.rating}
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 line-clamp-2">${video.title}</h3>
+                    <p class="text-gray-600 mb-4 line-clamp-2">${video.description}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm text-gray-500">${video.master}</span>
+                        <span class="text-sm text-gray-500">${video.views.toLocaleString()} 次观看</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="btn-primary flex-1" onclick="playVideo(${video.id})">观看</button>
+                        <button class="btn-secondary" onclick="toggleFavorite(${video.id})">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function playVideo(videoId) {
+            // Check user membership level
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (!user.membership || user.membership === 'free') {
+                alert('请升级会员以观看完整视频');
+                window.location.href = 'membership.html';
+                return;
+            }
+            
+            alert(`正在播放视频 ID: ${videoId}`);
+            // Here you would implement actual video playback
+        }
+
+        function toggleFavorite(videoId) {
+            // Implement favorite functionality
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const index = favorites.indexOf(videoId);
+            
+            if (index > -1) {
+                favorites.splice(index, 1);
+                alert('已取消收藏');
+            } else {
+                favorites.push(videoId);
+                alert('已添加到收藏');
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+    </script>
+</body>
+</html>

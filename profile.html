@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 武学堂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #2C2C2C;
+            --vermillion: #D32F2F;
+            --forest-green: #2E7D32;
+            --gold: #FFA000;
+            --ink-gray: #757575;
+            --paper-white: #FEFEFE;
+            --light-ink: #BDBDBD;
+            --deep-teal: #00695C;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #FEFEFE 0%, #F5F5F5 100%);
+            color: var(--ink-black);
+        }
+        
+        .hero-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            background: linear-gradient(45deg, var(--vermillion), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .decorative-title {
+            font-family: 'ZCOOL XiaoWei', serif;
+            color: var(--deep-teal);
+        }
+        
+        .navigation {
+            background: rgba(254, 254, 254, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--light-ink);
+        }
+        
+        .sidebar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--light-ink);
+            border-radius: 12px;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--vermillion), #E53935);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(211,47,47,0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--deep-teal);
+            border: 2px solid var(--deep-teal);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--deep-teal);
+            color: white;
+        }
+        
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(211, 47, 47, 0.1);
+        }
+        
+        .nav-item.active {
+            background: rgba(211, 47, 47, 0.1);
+            border-left-color: var(--vermillion);
+            color: var(--vermillion);
+        }
+        
+        .progress-bar {
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--forest-green), var(--deep-teal));
+            height: 8px;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--paper-white) 0%, #F8F9FA 100%);
+            border: 1px solid var(--light-ink);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(44,44,44,0.1);
+        }
+        
+        .video-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--light-ink);
+            transition: all 0.3s ease;
+        }
+        
+        .video-item:hover {
+            border-color: var(--vermillion);
+            transform: translateX(4px);
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .footer {
+            background: var(--ink-black);
+            color: var(--paper-white);
+            border-top: 3px solid var(--vermillion);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(135deg, var(--gold), #FFB300);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .membership-badge {
+            background: linear-gradient(135deg, var(--vermillion), #E53935);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="./resources/logo.png" alt="武学堂" class="w-10 h-10">
+                <h1 class="text-2xl font-bold hero-title">武学堂</h1>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">首页</a>
+                <a href="videos.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">视频教程</a>
+                <a href="membership.html" class="text-lg font-medium text-gray-800 hover:text-red-600 transition-colors">会员中心</a>
+                <a href="profile.html" class="text-lg font-medium text-red-600">个人中心</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="logoutBtn" class="btn-secondary">退出登录</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="pt-24 pb-20 px-6 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar -->
+                <div class="lg:w-1/4">
+                    <div class="sidebar p-6 sticky top-24">
+                        <!-- User Profile -->
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-red-600" id="userAvatar">张</span>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2" id="userName">张三</h3>
+                            <div class="membership-badge" id="membershipBadge">年卡会员</div>
+                            <p class="text-sm text-gray-500 mt-2" id="membershipExpiry">到期时间: 2025-10-26</p>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <nav class="space-y-2">
+                            <div class="nav-item active" data-tab="dashboard">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                                    </svg>
+                                    学习仪表板
+                                </div>
+                            </div>
+                            <div class="nav-item" data-tab="progress">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    学习进度
+                                </div>
+                            </div>
+                            <div class="nav-item" data-tab="favorites">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    我的收藏
+                                </div>
+                            </div>
+                            <div class="nav-item" data-tab="history">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    观看历史
+                                </div>
+                            </div>
+                            <div class="nav-item" data-tab="achievements">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                    成就徽章
+                                </div>
+                            </div>
+                            <div class="nav-item" data-tab="settings">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    账户设置
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="lg:w-3/4">
+                    <!-- Dashboard Tab -->
+                    <div id="dashboard" class="tab-content active">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">学习仪表板</h2>
+                            <p class="text-gray-600">欢迎回来！继续您的武术学习之旅</p>
+                        </div>
+                        
+                        <!-- Statistics Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="stat-card scroll-reveal">
+                                <div class="text-3xl font-bold text-red-600 mb-2" id="totalVideos">24</div>
+                                <div class="text-gray-600">观看视频数</div>
+                            </div>
+                            <div class="stat-card scroll-reveal">
+                                <div class="text-3xl font-bold text-green-600 mb-2" id="totalHours">18.5</div>
+                                <div class="text-gray-600">学习时长(小时)</div>
+                            </div>
+                            <div class="stat-card scroll-reveal">
+                                <div class="text-3xl font-bold text-blue-600 mb-2" id="streakDays">12</div>
+                                <div class="text-gray-600">连续学习天数</div>
+                            </div>
+                            <div class="stat-card scroll-reveal">
+                                <div class="text-3xl font-bold text-purple-600 mb-2" id="achievements">5</div>
+                                <div class="text-gray-600">获得徽章</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Learning Progress Chart -->
+                        <div class="content-card p-6 mb-8 scroll-reveal">
+                            <h3 class="text-xl font-bold mb-4">学习进度统计</h3>
+                            <div id="progressChart" style="height: 300px;"></div>
+                        </div>
+                        
+                        <!-- Continue Learning -->
+                        <div class="content-card p-6 scroll-reveal">
+                            <h3 class="text-xl font-bold mb-4">继续学习</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="video-item">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="./resources/shaolin1.jpg" alt="少林基本功" class="w-16 h-16 object-cover rounded">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold">少林基本功 - 马步冲拳</h4>
+                                            <p class="text-sm text-gray-500">上次观看: 25:30 / 25:30</p>
+                                            <div class="progress-bar mt-2">
+                                                <div class="progress-fill" style="width: 100%;"></div>
+                                            </div>
+                                        </div>
+                                        <button class="btn-primary text-sm">复习</button>
+                                    </div>
+                                </div>
+                                <div class="video-item">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="./resources/taichi1.jpg" alt="太极拳" class="w-16 h-16 object-cover rounded">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold">24式太极拳 - 起势到野马分鬃</h4>
+                                            <p class="text-sm text-gray-500">上次观看: 12:15 / 18:45</p>
+                                            <div class="progress-bar mt-2">
+                                                <div class="progress-fill" style="width: 65%;"></div>
+                                            </div>
+                                        </div>
+                                        <button class="btn-primary text-sm">继续</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Tab -->
+                    <div id="progress" class="tab-content">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">学习进度</h2>
+                            <p class="text-gray-600">查看各门派的学习进度和掌握情况</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="content-card p-6 scroll-reveal">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-lg">少林功夫</h3>
+                                    <span class="text-sm text-gray-500">8/12 视频</span>
+                                </div>
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 67%;"></div>
+                                </div>
+                                <p class="text-sm text-gray-600">已完成基础功法学习，建议继续学习进阶套路</p>
+                            </div>
+                            
+                            <div class="content-card p-6 scroll-reveal">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-lg">太极拳</h3>
+                                    <span class="text-sm text-gray-500">3/8 视频</span>
+                                </div>
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 38%;"></div>
+                                </div>
+                                <p class="text-sm text-gray-600">正在学习24式太极拳，建议保持每日练习</p>
+                            </div>
+                            
+                            <div class="content-card p-6 scroll-reveal">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-lg">咏春拳</h3>
+                                    <span class="text-sm text-gray-500">1/6 视频</span>
+                                </div>
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 17%;"></div>
+                                </div>
+                                <p class="text-sm text-gray-600">刚开始学习小念头，建议打好基础</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Favorites Tab -->
+                    <div id="favorites" class="tab-content">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">我的收藏</h2>
+                            <p class="text-gray-600">您收藏的精彩视频课程</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="content-card p-4 scroll-reveal">
+                                <div class="flex items-center space-x-4">
+                                    <img src="./resources/shaolin1.jpg" alt="少林基本功" class="w-20 h-20 object-cover rounded">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold mb-1">少林基本功 - 马步冲拳</h3>
+                                        <p class="text-sm text-gray-500 mb-2">释永信大师 • 25:30</p>
+                                        <div class="flex space-x-2">
+                                            <button class="btn-primary text-sm">观看</button>
+                                            <button class="btn-secondary text-sm">取消收藏</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="content-card p-4 scroll-reveal">
+                                <div class="flex items-center space-x-4">
+                                    <img src="./resources/wingchun1.jpg" alt="咏春拳" class="w-20 h-20 object-cover rounded">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold mb-1">咏春拳小念头 - 基础手法</h3>
+                                        <p class="text-sm text-gray-500 mb-2">叶问传人 • 32:15</p>
+                                        <div class="flex space-x-2">
+                                            <button class="btn-primary text-sm">观看</button>
+                                            <button class="btn-secondary text-sm">取消收藏</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- History Tab -->
+                    <div id="history" class="tab-content">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">观看历史</h2>
+                            <p class="text-gray-600">您最近观看的视频记录</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="content-card p-4 scroll-reveal">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="./resources/taichi1.jpg" alt="太极拳" class="w-16 h-16 object-cover rounded">
+                                        <div>
+                                            <h3 class="font-semibold">24式太极拳 - 起势到野马分鬃</h3>
+                                            <p class="text-sm text-gray-500">上次观看: 今天 14:30</p>
+                                            <div class="progress-bar mt-2 w-32">
+                                                <div class="progress-fill" style="width: 65%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn-primary">继续观看</button>
+                                </div>
+                            </div>
+                            
+                            <div class="content-card p-4 scroll-reveal">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="./resources/shaolin1.jpg" alt="少林功夫" class="w-16 h-16 object-cover rounded">
+                                        <div>
+                                            <h3 class="font-semibold">少林基本功 - 马步冲拳</h3>
+                                            <p class="text-sm text-gray-500">上次观看: 昨天 19:15</p>
+                                            <div class="progress-bar mt-2 w-32">
+                                                <div class="progress-fill" style="width: 100%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn-secondary">复习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements Tab -->
+                    <div id="achievements" class="tab-content">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">成就徽章</h2>
+                            <p class="text-gray-600">您在武术学习中获得的各种成就</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <div class="content-card p-6 text-center scroll-reveal">
+                                <div class="achievement-badge mx-auto mb-4">初心者</div>
+                                <h3 class="font-semibold mb-2">武术初心</h3>
+                                <p class="text-sm text-gray-500">完成第一个武术视频</p>
+                                <div class="text-xs text-green-600 mt-2">已获得</div>
+                            </div>
+                            
+                            <div class="content-card p-6 text-center scroll-reveal">
+                                <div class="achievement-badge mx-auto mb-4">坚持者</div>
+                                <h3 class="font-semibold mb-2">坚持不懈</h3>
+                                <p class="text-sm text-gray-500">连续学习7天</p>
+                                <div class="text-xs text-green-600 mt-2">已获得</div>
+                            </div>
+                            
+                            <div class="content-card p-6 text-center scroll-reveal">
+                                <div class="achievement-badge mx-auto mb-4">探索者</div>
+                                <h3 class="font-semibold mb-2">武道探索</h3>
+                                <p class="text-sm text-gray-500">学习3个不同门派</p>
+                                <div class="text-xs text-gray-400 mt-2">未获得</div>
+                            </div>
+                            
+                            <div class="content-card p-6 text-center scroll-reveal">
+                                <div class="achievement-badge mx-auto mb-4">大师</div>
+                                <h3 class="font-semibold mb-2">武道大师</h3>
+                                <p class="text-sm text-gray-500">完成100个视频学习</p>
+                                <div class="text-xs text-gray-400 mt-2">未获得</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Tab -->
+                    <div id="settings" class="tab-content">
+                        <div class="mb-8">
+                            <h2 class="decorative-title text-3xl font-bold mb-4">账户设置</h2>
+                            <p class="text-gray-600">管理您的个人信息和账户设置</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="content-card p-6 scroll-reveal">
+                                <h3 class="font-bold text-lg mb-4">基本信息</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">用户名</label>
+                                        <input type="text" value="张三" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">邮箱</label>
+                                        <input type="email" value="zhangsan@example.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">手机号</label>
+                                        <input type="tel" value="138****8888" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                </div>
+                                <button class="btn-primary mt-4">保存修改</button>
+                            </div>
+                            
+                            <div class="content-card p-6 scroll-reveal">
+                                <h3 class="font-bold text-lg mb-4">修改密码</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">当前密码</label>
+                                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">新密码</label>
+                                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">确认新密码</label>
+                                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                                    </div>
+                                </div>
+                                <button class="btn-primary mt-4">修改密码</button>
+                            </div>
+                            
+                            <div class="content-card p-6 scroll-reveal">
+                                <h3 class="font-bold text-lg mb-4">会员状态</h3>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold">年卡会员</p>
+                                        <p class="text-sm text-gray-500">到期时间: 2025-10-26</p>
+                                    </div>
+                                    <button class="btn-primary" onclick="window.location.href='membership.html'">续费升级</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer py-12 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-6">
+                <img src="./resources/logo.png" alt="武学堂" class="w-8 h-8">
+                <h3 class="text-2xl font-bold">武学堂</h3>
+            </div>
+            <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                传承千年武学精髓，弘扬中华武术文化。我们致力于通过现代化的教学方式，让更多人了解和学习正宗的中国武术。
+            </p>
+            <div class="border-t border-gray-700 pt-6">
+                <p class="text-gray-500">
+                    © 2024 武学堂. 保留所有权利. | 京ICP备12345678号 | 京公网安备11010802012345号
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // Remove active class from all nav items and tab contents
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked nav item and corresponding tab content
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Initialize progress chart
+            initProgressChart();
+            
+            // Load user data
+            loadUserData();
+            
+            // Scroll reveal animation
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                observer.observe(el);
+            });
+        });
+        
+        function initProgressChart() {
+            const chartDom = document.getElementById('progressChart');
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                title: {
+                    text: '学习时长统计',
+                    left: 'center',
+                    textStyle: {
+                        color: '#2C2C2C',
+                        fontSize: 16,
+                        fontWeight: 'bold'
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#D32F2F'
+                        }
+                    }
+                },
+                legend: {
+                    data: ['学习时长(小时)', '完成视频数'],
+                    bottom: 10
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    axisLine: {
+                        lineStyle: {
+                            color: '#BDBDBD'
+                        }
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '学习时长(小时)',
+                        position: 'left',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#2E7D32'
+                            }
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '完成视频数',
+                        position: 'right',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#D32F2F'
+                            }
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '学习时长(小时)',
+                        type: 'bar',
+                        data: [2.5, 3.2, 1.8, 4.1, 2.9, 3.5, 2.8],
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#2E7D32' },
+                                { offset: 1, color: '#00695C' }
+                            ])
+                        }
+                    },
+                    {
+                        name: '完成视频数',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: [3, 4, 2, 5, 3, 4, 3],
+                        itemStyle: {
+                            color: '#D32F2F'
+                        },
+                        lineStyle: {
+                            color: '#D32F2F'
+                        }
+                    }
+                ]
+            };
+            
+            myChart.setOption(option);
+            
+            // Make chart responsive
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
+        }
+        
+        function loadUserData() {
+            // Load user data from localStorage
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            if (user.name) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userAvatar').textContent = user.name.charAt(0);
+            }
+            
+            if (user.membership) {
+                const membershipText = {
+                    'free': '体验会员',
+                    'monthly': '月卡会员',
+                    'yearly': '年卡会员',
+                    'lifetime': '永久会员',
+                    'vip': 'VIP至尊'
+                }[user.membership] || '未知会员';
+                
+                document.getElementById('membershipBadge').textContent = membershipText;
+                
+                if (user.membershipEndDate) {
+                    const endDate = new Date(user.membershipEndDate).toLocaleDateString();
+                    document.getElementById('membershipExpiry').textContent = `到期时间: ${endDate}`;
+                } else if (user.membership === 'lifetime' || user.membership === 'vip') {
+                    document.getElementById('membershipExpiry').textContent = '永久有效';
+                }
+            }
+        }
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            alert('已退出登录');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
